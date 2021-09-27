@@ -1,0 +1,10 @@
+{
+	"[python]": {
+		"gitlens.codeLens.symbolScopes": [
+			"!Module"
+		],
+		"editor.wordBasedSuggestions": false,
+		"editor.tabSize": 4
+	},
+	"python.formatting.provider": "black"
+}
