@@ -25,7 +25,7 @@ class DentReLUFunction(torch.autograd.Function):
 
 
 class DentReLU(nn.Module):
-    def __init__(self, p: int = -0.2):
+    def __init__(self, p: float = -0.2):
         super(DentReLU, self).__init__()
         self.p = p
 
