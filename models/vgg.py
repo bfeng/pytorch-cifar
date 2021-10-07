@@ -85,10 +85,13 @@ class VGG(nn.Module):
 
 
 class CustomVGG(nn.Module):
-    def __init__(self, vgg_name):
+    p_value: float
+
+    def __init__(self, vgg_name, p_value=-0.5):
         super(CustomVGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
         self.classifier = nn.Linear(512, 10)
+        self.p_value = p_value
 
     def forward(self, x):
         out = self.features(x)
@@ -106,7 +109,7 @@ class CustomVGG(nn.Module):
                 layers += [
                     nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
                     nn.BatchNorm2d(x),
-                    DentReLU(p=-0.5),
+                    DentReLU(p=self.p_value),
                 ]
                 in_channels = x
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]

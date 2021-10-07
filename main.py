@@ -74,7 +74,7 @@ classes = (
 # Model
 print("==> Building model..")
 # net = VGG("VGG16")
-net = CustomVGG("VGG16")
+net = CustomVGG("VGG16", p_value=-0.5)
 # net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
