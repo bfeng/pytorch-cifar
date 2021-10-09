@@ -89,9 +89,9 @@ class CustomVGG(nn.Module):
 
     def __init__(self, vgg_name, p_value=-0.5):
         super(CustomVGG, self).__init__()
+        self.p_value = p_value
         self.features = self._make_layers(cfg[vgg_name])
         self.classifier = nn.Linear(512, 10)
-        self.p_value = p_value
 
     def forward(self, x):
         out = self.features(x)

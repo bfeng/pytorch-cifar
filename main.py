@@ -73,8 +73,14 @@ classes = (
 
 # Model
 print("==> Building model..")
-# net = VGG("VGG16")
-net = CustomVGG("VGG16", p_value=-0.5)
+checkpoint_dir = "checkpoint-vgg16"
+net = VGG("VGG16")
+print("Stock VGG16")
+# p_val = -1.8
+# checkpoint_dir = f"checkpoint-cvgg16-p{p_val}"
+# print("Custom VGG16", "p=", p_val)
+print("Saving to", checkpoint_dir)
+# net = CustomVGG("VGG16", p_value=p_val)
 # net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
@@ -136,6 +142,10 @@ def train(epoch):
         )
 
 
+test_history_acc = []
+test_history_loss = []
+
+
 def test(epoch):
     global best_acc
     net.eval()
@@ -164,9 +174,11 @@ def test(epoch):
                     total,
                 ),
             )
+        test_history_loss.append(test_loss / (batch_idx + 1))
 
     # Save checkpoint.
     acc = 100.0 * correct / total
+    test_history_acc.append(acc)
     if acc > best_acc:
         print("Saving..")
         state = {
@@ -174,9 +186,9 @@ def test(epoch):
             "acc": acc,
             "epoch": epoch,
         }
-        if not os.path.isdir("checkpoint"):
-            os.mkdir("checkpoint")
-        torch.save(state, "./checkpoint/ckpt.pth")
+        if not os.path.isdir(checkpoint_dir):
+            os.mkdir(checkpoint_dir)
+        torch.save(state, f"./{checkpoint_dir}/ckpt.pth")
         best_acc = acc
 
 
@@ -184,3 +196,5 @@ for epoch in range(start_epoch, start_epoch + 200):
     train(epoch)
     test(epoch)
     scheduler.step()
+print("hist_acc", test_history_acc)
+print("hist_loss", test_history_loss)
