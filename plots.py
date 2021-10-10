@@ -1,11 +1,10 @@
-from typing import Callable
+from typing import Callable, Union
 from matplotlib.axes import Axes
 import torch
 import torch.nn as nn
 import numpy as np
 from models.custom import DentReLUFunction
 import matplotlib.pyplot as plt
-from models.vgg import VGG, CustomVGG
 import utils
 import models
 
@@ -80,22 +79,22 @@ def plot_train_test():
     _ax_plot(ax_func, "train_test")
 
 
-def plot_hist(net, checkpoint, name):
+def plot_hist(net: Union[models.VGG, models.CustomVGG], checkpoint, name):
     conv_out = []
     norm_out = []
     relu_out = []
 
-    def conv_hook_fn(m, i, o):
+    def conv_hook_fn(m, i, o: torch.Tensor):
         print(m)
-        conv_out.append(o)
+        conv_out.append(o.clone().detach())
 
-    def norm_hook_fn(m, i, o):
+    def norm_hook_fn(m, i, o: torch.Tensor):
         print(m)
-        norm_out.append(o)
+        norm_out.append(o.clone().detach())
 
-    def relu_hook_fn(m, i, o):
+    def relu_hook_fn(m, i, o: torch.Tensor):
         print(m)
-        relu_out.append(o)
+        relu_out.append(o.clone().detach())
 
     testloader = utils.prepare_test_data()
     net.features[0].register_forward_hook(conv_hook_fn)
