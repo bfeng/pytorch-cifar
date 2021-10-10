@@ -29,6 +29,26 @@ cfg = {
         512,
         "M",
     ],
+    "VGG16A": [
+        64,
+        64,
+        "A",
+        128,
+        128,
+        "A",
+        256,
+        256,
+        256,
+        "A",
+        512,
+        512,
+        512,
+        "A",
+        512,
+        512,
+        512,
+        "A",
+    ],
     "VGG19": [
         64,
         64,
@@ -105,6 +125,8 @@ class CustomVGG(nn.Module):
         for x in cfg:
             if x == "M":
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            elif x == "A":
+                layers += [nn.AvgPool2d(kernel_size=2, stride=2)]
             else:
                 layers += [
                     nn.Conv2d(in_channels, x, kernel_size=3, padding=1),

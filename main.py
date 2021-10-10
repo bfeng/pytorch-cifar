@@ -74,13 +74,13 @@ classes = (
 # Model
 print("==> Building model..")
 checkpoint_dir = "checkpoint-vgg16"
-net = VGG("VGG16")
-print("Stock VGG16")
-# p_val = -1.8
-# checkpoint_dir = f"checkpoint-cvgg16-p{p_val}"
-# print("Custom VGG16", "p=", p_val)
+# net = VGG("VGG16")
+# print("Stock VGG16")
+p_val = -1
+checkpoint_dir = f"checkpoint-cvgg16a-p{p_val}"
+print("Custom VGG16", "p=", p_val)
 print("Saving to", checkpoint_dir)
-# net = CustomVGG("VGG16", p_value=p_val)
+net = CustomVGG("VGG16A", p_value=p_val)
 # net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
