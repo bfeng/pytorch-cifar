@@ -115,6 +115,7 @@ def plot_hist(net: Union[models.VGG, models.CustomVGG], checkpoint, name):
         ax.hist(h0, label=["conv"], bins=10)
         ax.legend()
         ax.set_title(f"Conv output: min={np.min(h0):.4f}, max={np.max(h0):.4f}")
+        np.savetxt(f"{name}-conv.txt", h0, fmt="%.8f")
 
     def norm_ax_func(ax):
         ax.set_xlim(-6, 6)
@@ -123,6 +124,7 @@ def plot_hist(net: Union[models.VGG, models.CustomVGG], checkpoint, name):
         ax.hist(h1, label=["norm"], bins=10)
         ax.legend()
         ax.set_title(f"Norm output: min={np.min(h1):.4f}, max={np.max(h1):.4f}")
+        np.savetxt(f"{name}-norm.txt", h1, fmt="%.8f")
 
     def relu_ax_func(ax):
         p_val = 3 if isinstance(net, models.CustomVGG) and net.p_value == -1 else 5
@@ -133,6 +135,7 @@ def plot_hist(net: Union[models.VGG, models.CustomVGG], checkpoint, name):
         ax.hist([h2], label=[label.lower()], bins=10)
         ax.legend()
         ax.set_title(f"{label} output: min={np.min(h2):.4f}, max={np.max(h2):.4f}")
+        np.savetxt(f"{name}-relu.txt", h2, fmt="%.8f")
 
     _ax_plot(conv_ax_func, f"{name}-conv")
     _ax_plot(norm_ax_func, f"{name}-norm")
