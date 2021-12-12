@@ -51,7 +51,12 @@ def save_layer_output(outputs: List[torch.Tensor], directory: str):
 def save_infer(
     net: Union[VGG, CustomVGG], checkpoint_dir: str, device, limit=-1,
 ):
-    export_dir = f"export/{checkpoint_dir}"
+    prefix = "checkpoint-"
+    start = checkpoint_dir.find(prefix)
+    if start == 0:
+        export_dir = checkpoint_dir[len(prefix) :]
+    export_dir = f"export/{export_dir}"
+    print("export results to", export_dir)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
 
