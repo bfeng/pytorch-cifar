@@ -39,17 +39,29 @@ def restore_weights(
     return net
 
 
-def save_layer_output(outputs: List[torch.Tensor], directory: str):
+def export_tensors(outputs: List[torch.Tensor], directory: str, suffix="plain"):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     for i, out in enumerate(outputs):
         print(out.shape)
-        np.save(f"{directory}/{i}.txt", out.cpu().numpy())
+        np.save(f"{directory}/{i}.{suffix}", out.cpu().numpy())
+
+
+def save_quantized_model_weights(model, directory: str):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    print("Model's state_dict:")
+    for param_tensor in model.state_dict():
+        weights = model.state_dict()[param_tensor]
+        if torch.is_tensor(weights):
+            print(param_tensor, "\t", weights.size())
+            np.save(f"{directory}/{param_tensor}", weights.cpu().numpy())
 
 
 def save_infer(
-    net: Union[VGG, CustomVGG], checkpoint_dir: str, device, limit=-1,
+    net: Union[VGG, CustomVGG], checkpoint_dir: str, device, limit=-1, quant_dtype=None,
 ):
     prefix = "checkpoint-"
     start = checkpoint_dir.find(prefix)
@@ -60,6 +72,7 @@ def save_infer(
     if not os.path.exists(export_dir):
         os.makedirs(export_dir)
 
+    exp_inputs = []
     conv_out = []
     norm_out = []
     relu_out = []
@@ -81,6 +94,13 @@ def save_infer(
     net = restore_weights(
         net=net, checkpoint_dir=checkpoint_dir, p_val=p_val, device=device
     )
+    suffix = "plain"
+    if quant_dtype is not None:
+        device = "cpu"
+        net = net.module.to(device)
+        torch.quantization.quantize_dynamic(net, dtype=quant_dtype, inplace=True)
+        save_quantized_model_weights(net, directory=f"{export_dir}/weights")
+        suffix = str(quant_dtype)
     net.eval()
     testloader = get_dataloader()
     with torch.no_grad():
@@ -88,13 +108,15 @@ def save_infer(
             if limit >= 0 and batch_idx >= limit:
                 break
             inputs, targets = inputs.to(device), targets.to(device)
+            exp_inputs.append(inputs.clone().detach())
             output = net(inputs)
             outputs.append(output.clone().detach())
 
-    save_layer_output(conv_out, f"{export_dir}/conv")
-    save_layer_output(norm_out, f"{export_dir}/norm")
-    save_layer_output(relu_out, f"{export_dir}/relu")
-    save_layer_output(outputs, f"{export_dir}/final")
+    export_tensors(exp_inputs, f"{export_dir}/input", suffix=suffix)
+    export_tensors(conv_out, f"{export_dir}/conv", suffix=suffix)
+    export_tensors(norm_out, f"{export_dir}/norm", suffix=suffix)
+    export_tensors(relu_out, f"{export_dir}/relu", suffix=suffix)
+    export_tensors(outputs, f"{export_dir}/final", suffix=suffix)
 
 
 if __name__ == "__main__":
@@ -106,4 +128,11 @@ if __name__ == "__main__":
     net = CustomVGG("VGG16A", p_value=p_val)
     save_infer(
         net=net, checkpoint_dir=checkpoint_dir, device=device, limit=10,
+    )
+    save_infer(
+        net=net,
+        checkpoint_dir=checkpoint_dir,
+        device=device,
+        limit=10,
+        quant_dtype=torch.qint8,
     )
